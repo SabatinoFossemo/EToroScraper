@@ -11,5 +11,5 @@ class Config:
     MARKETS.LINK = HOME + MARKETS.LINK
 
     EXCHANGES = pd.read_csv('doc/exchanges.csv', index_col=0)
-    EXCHANGES = MARKETS.loc['STOCKS'].LINK + EXCHANGES.LINK
+    EXCHANGES.LINK = MARKETS.loc['STOCKS'].LINK + EXCHANGES.LINK
 
