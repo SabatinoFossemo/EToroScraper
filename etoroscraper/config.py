@@ -6,10 +6,10 @@ class Config:
 
     HOME = BASE.loc['HOME'].LINK
     LOGIN = HOME + BASE.loc['LOGIN'].LINK
+    DISCOVER = HOME + BASE.loc['DISCOVER'].LINK
 
-    MARKETS = pd.read_csv('doc/markets.csv', index_col=0)
-    MARKETS.LINK = HOME + MARKETS.LINK
+    MARKETS = pd.read_csv('doc/markets.csv')
+    MARKETS.LINK = DISCOVER + MARKETS.LINK
 
-    EXCHANGES = pd.read_csv('doc/exchanges.csv', index_col=0)
-    EXCHANGES.LINK = MARKETS.loc['STOCKS'].LINK + EXCHANGES.LINK
+
 

@@ -14,6 +14,7 @@ def login(driver, login_page):
     # Read user and password
     with open('logindata.csv', 'r') as log_data:
         username, password = log_data.read().split(',')
+        log_data.close()
 
     # Get login page
     driver.get(login_page)
@@ -34,6 +35,7 @@ def login(driver, login_page):
 
 
 def main():
+
     # Start Chrome Driver
     options = uc.ChromeOptions()
 
@@ -47,9 +49,10 @@ def main():
 
     # SCRAPE STOCKS
     stocks = []
-    for exc_row in Config.EXCHANGES.iterrows():
+    for exc_row in Config.MARKETS.iterrows():
         exchange = exc_row[1].LINK
         exc_name = exc_row[1].NAME
+        exc_cat = exc_row[1].CATEGORY
         print(exchange)
         driver.get(exchange)
         # input('Exchange Loaded?')
@@ -59,7 +62,10 @@ def main():
         num_items = int(num_items.text.replace(',', ''))
         print(f'{num_items} items found')
 
-        next_button = driver.find_element(By.XPATH, '//*[@automation-id="discover-market-next-button"]')
+        next_button = None
+        if num_items > 50:
+            next_button = driver.find_element(By.XPATH, '//*[@automation-id="discover-market-next-button"]')
+
 
         while True:
             counted = 0
@@ -70,11 +76,15 @@ def main():
                 xp_tick = './/*[@automation-id="trade-item-name"]'
                 xp_name = './/*[@automation-id="trade-item-full-name"]'
                 ticker = row.find_element(By.XPATH, xp_tick).get_attribute('innerHTML')
-                name = row.find_element(By.XPATH, xp_name).get_attribute('innerHTML')
                 idx = ticker.find(' ')
                 ticker = ticker[:idx]
-                print(f'{ticker}, {name}')
-                stocks.append([exc_name, ticker, name])
+
+                name = row.find_element(By.XPATH, xp_name).get_attribute('innerHTML').replace(',', '')
+                if name == '':
+                    name = ticker
+
+                print(f'{exc_cat}, {exc_name}, {name},  {ticker}')
+                stocks.append([exc_cat, exc_name, name,  ticker])
                 counted += 1
 
             num_items -= counted
@@ -84,13 +94,18 @@ def main():
 
             if num_items <= 0:
                 break
-            else:
+            elif next_button is not None:
+                pop_xp = '//*[@id="cdk-overlay-0"]/et-dialog-container/et-pre-push/div/div[1]/a'
+                pop = driver.find_element(By.XPATH, pop_xp)
+                try:
+                    pop.click()
+                except:
+                    pass
                 next_button.click()
-            # input('PRESS ENTER WHEN PAGE IS LOADED')
-            time.sleep(2)
+            time.sleep(3)
 
-    stocks = pd.DataFrame(stocks, columns=['EXCHANGE', 'TICKER', 'NAME'])
-    stocks.to_csv('stocks.csv', index_label=False)
+    stocks = pd.DataFrame(stocks, columns=['CATEGORY', 'EXCHANGE', 'NAME', 'ETORO_TICKER'])
+    stocks.to_csv(f'download/e_toro.csv', index=False)
 
     driver.close()
 
