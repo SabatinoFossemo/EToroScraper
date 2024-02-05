@@ -1,6 +1,5 @@
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
-from bs4 import BeautifulSoup
 import pandas as pd
 import time
 
@@ -95,17 +94,20 @@ def main():
             if num_items <= 0:
                 break
             elif next_button is not None:
+                # todo:  check pop up
                 pop_xp = '//*[@id="cdk-overlay-0"]/et-dialog-container/et-pre-push/div/div[1]/a'
                 pop = driver.find_element(By.XPATH, pop_xp)
                 try:
                     pop.click()
                 except:
                     pass
+
+
                 next_button.click()
             time.sleep(3)
 
     stocks = pd.DataFrame(stocks, columns=['CATEGORY', 'EXCHANGE', 'NAME', 'ETORO_TICKER'])
-    stocks.to_csv(f'download/e_toro.csv', index=False)
+    stocks.to_csv(f'download/etoro.csv', index=False)
 
     driver.close()
 
